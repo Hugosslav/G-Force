@@ -1,33 +1,24 @@
-import CoreMotion
 import Foundation
 
-@Observable
-final class MotionManager {
-    private let motionManager = CMMotionManager()
+struct GSample: Identifiable, Codable, Hashable {
+    let id: UUID
+    let timestamp: Date
+    let xG: Double
+    let yG: Double
+    let zG: Double
 
-    var xG: Double = 0
-    var yG: Double = 0
-    var zG: Double = 0
+    init(id: UUID = UUID(), timestamp: Date = Date(), xG: Double, yG: Double, zG: Double) {
+        self.id = id
+        self.timestamp = timestamp
+        self.xG = xG
+        self.yG = yG
+        self.zG = zG
+    }
+
+    var lateralG: Double { xG }
+    var longitudinalG: Double { -yG }
 
     var totalG: Double {
         sqrt(xG * xG + yG * yG + zG * zG)
-    }
-
-    func start() {
-        guard motionManager.isDeviceMotionAvailable else { return }
-
-        motionManager.deviceMotionUpdateInterval = 1.0 / 60.0
-
-        motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, error in
-            guard let self, let motion else { return }
-
-            self.xG = motion.userAcceleration.x
-            self.yG = motion.userAcceleration.y
-            self.zG = motion.userAcceleration.z
-        }
-    }
-
-    func stop() {
-        motionManager.stopDeviceMotionUpdates()
     }
 }
